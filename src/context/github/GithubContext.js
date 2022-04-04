@@ -12,6 +12,8 @@ const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN
 export const GithubProvider = ({children}) => {
     const initialState = {
         users: [],
+        user: {},
+        repos:[],
         loading: false,
     }
 
@@ -43,6 +45,61 @@ export const GithubProvider = ({children}) => {
         })
     }
 
+
+    // Get a single user
+    const getUser = async (login) => {
+        setLoading()
+
+        //this is the end point that we are hitting from the api
+        const response = await fetch(`${GITHUB_URL}/users/${login}`, {
+            headers: {
+                Authorization: `token ${GITHUB_TOKEN}`,
+            },
+        })
+
+        //If the user doesn't exist redirec tot 404
+        if (response.status === 404){
+            window.location = '/notfound'
+        }else{
+            //setting the response to a data variable
+            const data = await response.json()
+    
+            dispatch({
+                type: 'GET_USER',
+                payload: data,
+            })
+        }
+
+        //when we send the request we get an object back in return so we are destructing the item object to get the data we need
+    }
+
+
+    //Get user repos
+    const getUserRepos = async (login) => {
+        setLoading()
+
+        //These are the params that we will put into the endpoint, here we want the most recent repos
+        const params = new URLSearchParams({
+            sort: 'created',
+            per_page: 10 
+        })
+
+        //this is the end point that we are hitting from the api
+        const response = await fetch(`${GITHUB_URL}/users/${login}/repos?${params}`, {
+            headers: {
+                Authorization: `token ${GITHUB_TOKEN}`,
+            },
+        })
+
+        //when we send the request we get an object back in return so we are destructing the item object to get the data we need
+        const data = await response.json()
+
+        dispatch({
+            type: 'GET_REPOS',
+            payload: data,
+        })
+    }
+
     //Clear usrs from state
     const clearUsers = () => dispatch({type: 'CLEAR_USERS'})
 
@@ -56,8 +113,12 @@ export const GithubProvider = ({children}) => {
             value={{
                 users: state.users,
                 loading: state.loading,
+                user: state.user,
+                repos: state.repos,
                 searchUsers,
                 clearUsers,
+                getUser,
+                getUserRepos,
             }}
             >
             {children}

@@ -1,5 +1,6 @@
 import {useState, useContext} from 'react'
 import GithubContext from '../../context/github/GithubContext'
+import AlertContext from '../../context/alert/AlertContext'
 
 function UserSearch() {
     //creating the state 
@@ -8,6 +9,9 @@ function UserSearch() {
 
     //bringing in the users and the search users function to use from the context
     const {users, searchUsers, clearUsers} = useContext(GithubContext)
+
+    //Bringing in set alert from the context
+    const {setAlert} = useContext(AlertContext)
 
     //Sets the state to the text that the input fielf has 
     const handleChange = (e) => setText(e.target.value)
@@ -20,7 +24,7 @@ function UserSearch() {
 
         //if there is no text in the state there will be an alert
         if(text === ''){
-            alert('Please enter something')
+            setAlert('Please enter something', 'error')
 
         }else{
             //calls the fucntion in the context and we are passing the text from our state into it
